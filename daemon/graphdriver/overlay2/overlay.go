@@ -84,7 +84,7 @@ const (
 	// The idLength should be selected such that following equation
 	// is true (512 is a buffer for label metadata).
 	// ((idLength + len(linkDir) + 1) * maxDepth) <= (pageSize - 512)
-	idLength = 26
+	IDLength = 26
 )
 
 type overlayOptions struct {
@@ -371,7 +371,7 @@ func (d *Driver) create(id, parent string, opts *graphdriver.CreateOpts) (retErr
 		return err
 	}
 
-	lid := generateID(idLength)
+	lid := GenerateID(idLength)
 	if err := os.Symlink(path.Join("..", id, diffDirName), path.Join(d.home, linkDir, lid)); err != nil {
 		return err
 	}
