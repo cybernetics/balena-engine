@@ -12,8 +12,13 @@ a2o-migrate: clean
 test-unit:
 	go test -cover -v ./...
 
-test-integration: a2o-migrate
-	./test/integration.sh
+test-integration: a2o-migrate test-integration-commit test-integration-failcleanup
+
+test-integration-commit:
+	TEST_MODE=commit ./test/integration.sh
+
+test-integration-failcleanup:
+	TEST_MODE=failcleanup ./test/integration.sh
 
 clean:
 	$(RM) ./a2o-migrate

@@ -11,7 +11,7 @@ balena_container_flags="--rm --detach --name ${container_name} --privileged -v v
 set -ex
 
 [ -n "${CONTAINERIZED}" ] && {
-    exec "${PROJECT}/test/integration-test.sh"
+    exec "${PROJECT}/test/integration-test-${TEST_MODE}.sh" ;;
 }
 
 test_out_dir=$(mktemp -d /tmp/a2o-migrate_test_XXXX)
