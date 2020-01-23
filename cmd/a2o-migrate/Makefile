@@ -1,0 +1,32 @@
+PWD := $(shell pwd)
+VERSION ?= $(shell git describe --tag --always)
+
+PROJECT=github.com/docker/docker/cmd/a2o-migrate
+GO_BUILDINFO=-X $(PROJECT).gitVersion=$(VERSION) -X $(PROJECT).buildTime=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+GO_LDFLAGS=-extldflags "-fno-PIC -static"
+GO_BUILDFLAGS=-ldflags '$(GO_LDFLAGS) $(GO_BUILDINFO)' -tags 'osusergo netgo static_build'
+
+a2o-migrate: clean
+	go build $(GO_BUILDFLAGS) -o ./$@ ./cli
+
+test-unit:
+	go test -cover -v ./...
+
+test-integration: a2o-migrate test-integration-commit test-integration-failcleanup
+
+test-integration-commit:
+	TEST_MODE=commit ./test/integration.sh
+
+test-integration-failcleanup:
+	TEST_MODE=failcleanup ./test/integration.sh
+
+clean:
+	$(RM) ./a2o-migrate
+
+all: clean test-unit test-integration
+
+.PHONY: \
+	all \
+	clean \
+	test-unit \
+	test-integration
