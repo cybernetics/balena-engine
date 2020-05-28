@@ -56,6 +56,7 @@ import (
 	"github.com/docker/docker/pkg/idtools"
 	"github.com/docker/docker/pkg/locker"
 	"github.com/docker/docker/pkg/plugingetter"
+	"github.com/docker/docker/pkg/storagemigration"
 	"github.com/docker/docker/pkg/sysinfo"
 	"github.com/docker/docker/pkg/system"
 	"github.com/docker/docker/pkg/truncindex"
@@ -931,6 +932,23 @@ func NewDaemon(ctx context.Context, config *config.Config, pluginStore *plugin.S
 
 	if err := d.setupDefaultLogConfig(); err != nil {
 		return nil, err
+	}
+
+	_, doStorageMigration := os.LookupEnv("BALENA_MIGRATE_OVERLAY")
+	if config.GraphDriver == "overlay2" && doStorageMigration {
+		logrus.Info("Starting storage migration to overlay2")
+		start := time.Now()
+		if err := storagemigration.Migrate(config.Root); err != nil {
+			if err := storagemigration.FailCleanup(config.Root); err != nil {
+				return nil, errors.Wrap(err, "failed to cleanup after failed migration")
+			}
+			return nil, errors.Wrap(err, "failed to migrate storage")
+		}
+
+		if err := storagemigration.Commit(config.Root); err != nil {
+			return nil, errors.Wrap(err, "failed to commit storage migration")
+		}
+		logrus.Infof("Finished storage migration to overlay2, took %s", time.Now().Sub(start))
 	}
 
 	for operatingSystem, gd := range d.graphDrivers {
