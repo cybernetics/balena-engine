@@ -1,4 +1,4 @@
-package a2o // import "github.com/docker/docker/cmd/a2o-migrate/a2o"
+package storagemigration // import "github.com/docker/docker/pkg/storagemigration"
 
 import (
 	"fmt"
@@ -9,9 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 
-	"github.com/docker/docker/cmd/a2o-migrate/aufsutil"
-	"github.com/docker/docker/cmd/a2o-migrate/osutil"
-	"github.com/docker/docker/cmd/a2o-migrate/overlayutil"
 	"github.com/docker/docker/pkg/archive"
 )
 
@@ -20,13 +17,13 @@ func Migrate() error {
 	logrus.Info("starting aufs -> overlay2 migration")
 
 	// make sure we actually have an aufs tree to migrate from
-	err := aufsutil.CheckRootExists(StorageRoot)
+	err := CheckRootExists(StorageRoot)
 	if err != nil {
 		return err
 	}
 
 	// make sure there isn't an overlay2 tree already
-	err = overlayutil.CheckRootExists(StorageRoot)
+	err = CheckRootExists(StorageRoot)
 	if err == nil {
 		logrus.Warn("overlay root found, cleaning up...")
 		err := os.Remove(overlayRoot())
@@ -46,7 +43,7 @@ func Migrate() error {
 	// mark deleted files and empty directories.
 
 	// get all layers
-	layerIDs, err := osutil.LoadIDs(diffDir)
+	layerIDs, err := loadIDs(diffDir)
 	if err != nil {
 		return fmt.Errorf("Error loading layer ids: %v", err)
 	}
@@ -59,7 +56,7 @@ func Migrate() error {
 
 		// get parent layers
 		logrus.Debug("parsing parent ids")
-		parentIDs, err := aufsutil.GetParentIDs(aufsRoot(), layerID)
+		parentIDs, err := GetParentIDs(aufsRoot(), layerID)
 		if err != nil {
 			return fmt.Errorf("Error loading parent IDs for %s: %v", layerID, err)
 		}
@@ -78,9 +75,9 @@ func Migrate() error {
 			}
 			logrus := logrus.WithField("path", absPath)
 
-			if aufsutil.IsWhiteout(fi.Name()) {
-				if aufsutil.IsWhiteoutMeta(fi.Name()) {
-					if aufsutil.IsOpaqueParentDir(fi.Name()) {
+			if IsWhiteout(fi.Name()) {
+				if IsWhiteoutMeta(fi.Name()) {
+					if IsOpaqueParentDir(fi.Name()) {
 						layer.Meta = append(layer.Meta, Meta{
 							Path: filepath.Dir(absPath),
 							Type: MetaOpaque,
@@ -100,7 +97,7 @@ func Migrate() error {
 
 				// simple whiteout file
 				layer.Meta = append(layer.Meta, Meta{
-					Path: filepath.Join(filepath.Dir(absPath), aufsutil.StripWhiteoutPrefix(fi.Name())),
+					Path: filepath.Join(filepath.Dir(absPath), StripWhiteoutPrefix(fi.Name())),
 					Type: MetaWhiteout,
 				})
 				logrus.Debug("discovered whiteout marker")
@@ -143,7 +140,7 @@ func Migrate() error {
 
 		logrus.Debug("creating layer link")
 		// create /:layer_id/link file and /l/:layer_ref file
-		_, err = overlayutil.CreateLayerLink(tempTargetRoot(), layer.ID)
+		_, err = CreateLayerLink(tempTargetRoot(), layer.ID)
 		if err != nil {
 			return fmt.Errorf("Error creating layer link dir for %s: %v", layer.ID, err)
 		}
@@ -155,7 +152,7 @@ func Migrate() error {
 			logrus := logrus.WithField("parent_layer_id", parentID)
 
 			parentLayerDir := filepath.Join(tempTargetRoot(), parentID)
-			ok, err := osutil.Exists(parentLayerDir, true)
+			ok, err := exists(parentLayerDir, true)
 			if err != nil {
 				return fmt.Errorf("Error checking for parent layer dir for %s: %v", layer.ID, err)
 			}
@@ -168,11 +165,11 @@ func Migrate() error {
 				}
 			}
 			logrus.Debug("creating parent layer link")
-			parentRef, err := overlayutil.CreateLayerLink(tempTargetRoot(), parentID)
+			parentRef, err := CreateLayerLink(tempTargetRoot(), parentID)
 			if err != nil {
 				return fmt.Errorf("Error creating layer link dir for parent layer %s: %v", parentID, err)
 			}
-			lower = overlayutil.AppendLower(lower, parentRef)
+			lower = AppendLower(lower, parentRef)
 		}
 		if lower != "" {
 			lowerFile := filepath.Join(layerDir, "lower")
@@ -208,7 +205,7 @@ func Migrate() error {
 			case MetaOpaque:
 				logrus.WithField("meta_type", "opaque").Debugf("translating %s to overlay", meta.Path)
 				// set the opque xattr
-				err := overlayutil.SetOpaque(metaPath)
+				err := SetOpaque(metaPath)
 				if err != nil {
 					return fmt.Errorf("Error marking %s as opque: %v", metaPath, err)
 				}
@@ -222,7 +219,7 @@ func Migrate() error {
 			case MetaWhiteout:
 				logrus.WithField("meta_type", "whiteout").Debugf("translating %s to overlay", meta.Path)
 				// create the 0x0 char device
-				err := overlayutil.SetWhiteout(metaPath)
+				err := SetWhiteout(metaPath)
 				if err != nil {
 					return fmt.Errorf("Error marking %s as whiteout: %v", metaPath, err)
 				}
@@ -230,7 +227,7 @@ func Migrate() error {
 				aufsMetaFile := filepath.Join(metaDir, archive.WhiteoutPrefix+metaFile)
 
 				// chown the new char device with the old uid/gid
-				uid, gid, err := osutil.GetUIDAndGID(aufsMetaFile)
+				uid, gid, err := getUIDAndGID(aufsMetaFile)
 				if err != nil {
 					return fmt.Errorf("Error getting UID and GID: %v", err)
 				}
