@@ -1,4 +1,4 @@
-package a2o
+package storagemigration
 
 import (
 	"encoding/json"
@@ -8,13 +8,11 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-
-	"github.com/docker/docker/cmd/a2o-migrate/osutil"
 )
 
 func SwitchAllContainersStorageDriver(newStorageDriver string) error {
 	containerDir := filepath.Join(StorageRoot, "containers")
-	containerIDs, err := osutil.LoadIDs(containerDir)
+	containerIDs, err := loadIDs(containerDir)
 	if err != nil {
 		return fmt.Errorf("Error listing containers: %v", err)
 	}
@@ -97,7 +95,7 @@ func replicate(sourceDir, targetDir string) error {
 }
 
 func removeDirIfExists(path string) error {
-	ok, err := osutil.Exists(path, true)
+	ok, err := exists(path, true)
 	if err != nil {
 		return err
 	}

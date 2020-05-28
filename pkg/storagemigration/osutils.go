@@ -1,4 +1,4 @@
-package osutil // import "github.com/docker/docker/cmd/a2o-migrate/osutil"
+package storagemigration
 
 import (
 	"io/ioutil"
@@ -7,8 +7,8 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// Exists checks if a file  (or if isDir is set to "true" a directory) exists
-func Exists(path string, isDir bool) (bool, error) {
+// exists checks if a file  (or if isDir is set to "true" a directory) exists
+func exists(path string, isDir bool) (bool, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -22,8 +22,8 @@ func Exists(path string, isDir bool) (bool, error) {
 	return true, nil
 }
 
-// GetUIDAndGID retrieves user and group id for path
-func GetUIDAndGID(path string) (uid, gid int, err error) {
+// getUIDAndGID retrieves user and group id for path
+func getUIDAndGID(path string) (uid, gid int, err error) {
 	var fi unix.Stat_t
 	err = unix.Stat(path, &fi)
 	if err != nil {
@@ -35,7 +35,7 @@ func GetUIDAndGID(path string) (uid, gid int, err error) {
 // Return all the directories
 //
 // from daemon/graphdriver/aufs/dirs.go
-func LoadIDs(root string) ([]string, error) {
+func loadIDs(root string) ([]string, error) {
 	dirs, err := ioutil.ReadDir(root)
 	if err != nil {
 		return nil, err

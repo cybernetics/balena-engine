@@ -1,5 +1,5 @@
 // TODO: do we need to handle .wh..wh.plnk layer hardlinks?
-package aufsutil
+package storagemigration
 
 import (
 	"bufio"

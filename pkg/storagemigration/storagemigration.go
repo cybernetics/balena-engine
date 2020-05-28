@@ -1,4 +1,5 @@
-package a2o
+// TODO we can probably re-use containerd libs?
+package storagemigration
 
 import "path/filepath"
 

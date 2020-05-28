@@ -1,4 +1,4 @@
-package a2o
+package storagemigration
 
 import (
 	"path/filepath"

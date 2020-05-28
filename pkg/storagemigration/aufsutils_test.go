@@ -1,4 +1,4 @@
-package aufsutil
+package storagemigration
 
 import "testing"
 

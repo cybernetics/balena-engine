@@ -1,4 +1,4 @@
-package overlayutil
+package storagemigration
 
 import (
 	"errors"
