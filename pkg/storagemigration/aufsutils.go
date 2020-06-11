@@ -20,7 +20,7 @@ var (
 )
 
 // CheckRootExists checks for the aufs storage root directory
-func CheckRootExists(engineDir string) error {
+func CheckAufsRootExists(engineDir string) error {
 	root := filepath.Join(engineDir, "aufs")
 	logrus.WithField("aufs_root", root).Debug("checking if aufs root exists")
 	ok, err := exists(root, true)
