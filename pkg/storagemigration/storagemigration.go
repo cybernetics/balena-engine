@@ -3,11 +3,9 @@ package storagemigration
 
 import "path/filepath"
 
-var StorageRoot = "/var/lib/balena-engine"
-
-func aufsRoot() string       { return filepath.Join(StorageRoot, "aufs") }
-func overlayRoot() string    { return filepath.Join(StorageRoot, "overlay2") }
-func tempTargetRoot() string { return filepath.Join(StorageRoot, "overlay2.temp") }
+func aufsRoot(root string) string       { return filepath.Join(root, "aufs") }
+func overlayRoot(root string) string    { return filepath.Join(root, "overlay2") }
+func tempTargetRoot(root string) string { return filepath.Join(root, "overlay2.temp") }
 
 // State models the state of the aufs/overlay2 directory
 type State struct {

@@ -7,17 +7,17 @@ import (
 )
 
 // Commit finalises the migration by deleting leftover data.
-func Commit() error {
-	logrus.Info("committing changes")
+func Commit(root string) error {
+	logrus.WithField("storage_root", root).Info("committing changes")
 
 	// remove aufs layer data
-	err := removeDirIfExists(aufsRoot())
+	err := removeDirIfExists(aufsRoot(root))
 	if err != nil {
 		return err
 	}
 
 	// remove images
-	aufsImageDir := filepath.Join(StorageRoot, "image", "aufs")
+	aufsImageDir := filepath.Join(root, "image", "aufs")
 	err = removeDirIfExists(aufsImageDir)
 	if err != nil {
 		return err

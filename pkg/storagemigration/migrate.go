@@ -13,20 +13,20 @@ import (
 )
 
 // Migrate migrates the state of the storage from aufs -> overlay2
-func Migrate() error {
-	logrus.Info("starting aufs -> overlay2 migration")
+func Migrate(root string) error {
+	logrus.WithField("storage_root", root).Info("starting aufs -> overlay2 migration")
 
 	// make sure we actually have an aufs tree to migrate from
-	err := CheckRootExists(StorageRoot)
+	err := CheckAufsRootExists(root)
 	if err != nil {
 		return err
 	}
 
 	// make sure there isn't an overlay2 tree already
-	err = CheckRootExists(StorageRoot)
+	err = CheckOvlRootExists(root)
 	if err == nil {
 		logrus.Warn("overlay root found, cleaning up...")
-		err := os.Remove(overlayRoot())
+		err := os.Remove(overlayRoot(root))
 		if err != nil {
 			return fmt.Errorf("Error cleaning up overlay2 root: %v", err)
 		}
@@ -34,7 +34,7 @@ func Migrate() error {
 
 	var state State
 
-	diffDir := filepath.Join(aufsRoot(), "diff")
+	diffDir := filepath.Join(aufsRoot(root), "diff")
 
 	// Step 1:
 	// Scan aufs layer data and build structure holding all the relevant information
@@ -56,7 +56,7 @@ func Migrate() error {
 
 		// get parent layers
 		logrus.Debug("parsing parent ids")
-		parentIDs, err := GetParentIDs(aufsRoot(), layerID)
+		parentIDs, err := GetParentIDs(aufsRoot(root), layerID)
 		if err != nil {
 			return fmt.Errorf("Error loading parent IDs for %s: %v", layerID, err)
 		}
@@ -128,7 +128,7 @@ func Migrate() error {
 		logrus := logrus.WithField("layer_id", layer.ID)
 
 		var (
-			layerDir = filepath.Join(tempTargetRoot(), layer.ID)
+			layerDir = filepath.Join(tempTargetRoot(root), layer.ID)
 		)
 
 		logrus.Debugf("creating base dir %s", layerDir)
@@ -140,7 +140,7 @@ func Migrate() error {
 
 		logrus.Debug("creating layer link")
 		// create /:layer_id/link file and /l/:layer_ref file
-		_, err = CreateLayerLink(tempTargetRoot(), layer.ID)
+		_, err = CreateLayerLink(tempTargetRoot(root), layer.ID)
 		if err != nil {
 			return fmt.Errorf("Error creating layer link dir for %s: %v", layer.ID, err)
 		}
@@ -151,7 +151,7 @@ func Migrate() error {
 		for _, parentID := range layer.ParentIDs {
 			logrus := logrus.WithField("parent_layer_id", parentID)
 
-			parentLayerDir := filepath.Join(tempTargetRoot(), parentID)
+			parentLayerDir := filepath.Join(tempTargetRoot(root), parentID)
 			ok, err := exists(parentLayerDir, true)
 			if err != nil {
 				return fmt.Errorf("Error checking for parent layer dir for %s: %v", layer.ID, err)
@@ -165,7 +165,7 @@ func Migrate() error {
 				}
 			}
 			logrus.Debug("creating parent layer link")
-			parentRef, err := CreateLayerLink(tempTargetRoot(), parentID)
+			parentRef, err := CreateLayerLink(tempTargetRoot(root), parentID)
 			if err != nil {
 				return fmt.Errorf("Error creating layer link dir for parent layer %s: %v", parentID, err)
 			}
@@ -189,7 +189,7 @@ func Migrate() error {
 		logrus.Debug("hardlinking aufs data to overlay")
 		var (
 			overlayLayerDir = filepath.Join(layerDir, "diff")
-			aufsLayerDir    = filepath.Join(aufsRoot(), "diff", layer.ID)
+			aufsLayerDir    = filepath.Join(aufsRoot(root), "diff", layer.ID)
 		)
 		err = replicate(aufsLayerDir, overlayLayerDir)
 		if err != nil {
@@ -261,8 +261,8 @@ func Migrate() error {
 
 	logrus.Info("moving aufs images to overlay")
 	var (
-		aufsImageDir    = filepath.Join(StorageRoot, "image", "aufs")
-		overlayImageDir = filepath.Join(StorageRoot, "image", "overlay2")
+		aufsImageDir    = filepath.Join(root, "image", "aufs")
+		overlayImageDir = filepath.Join(root, "image", "overlay2")
 	)
 	err = replicate(aufsImageDir, overlayImageDir)
 	if err != nil {
@@ -270,12 +270,12 @@ func Migrate() error {
 	}
 
 	logrus.Info("moving layer data from temporary location to overlay2 root")
-	err = os.Rename(tempTargetRoot(), overlayRoot())
+	err = os.Rename(tempTargetRoot(root), overlayRoot(root))
 	if err != nil {
 		return fmt.Errorf("Error moving from temporary root: %v", err)
 	}
 
-	err = SwitchAllContainersStorageDriver("overlay2")
+	err = SwitchAllContainersStorageDriver(root, "overlay2")
 	if err != nil {
 		return fmt.Errorf("Error migrating containers to overlay2: %v", err)
 	}

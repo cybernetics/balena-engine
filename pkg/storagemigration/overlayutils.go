@@ -19,7 +19,7 @@ var (
 )
 
 // CheckRootExists checks for the overlay storage root directory
-func CheckRootExists(engineDir string) error {
+func CheckOvlRootExists(engineDir string) error {
 	root := filepath.Join(engineDir, "overlay2")
 	logrus.WithField("overlay_root", root).Debug("checking if overlay2 root exists")
 	ok, err := exists(root, true)
