@@ -1,4 +1,49 @@
 - commits:
+    - subject: Add migration-tool for aufs to overlay2
+      hash: 42d3fb1c38444b394cd5aa9a7097ee4d80f40211
+      body: >
+        Implements storage-driver migration without the need to pull layer data
+        again.
+
+        To achieve this we translate the on-disk AUFS file tree to the format
+        used by
+
+        overlayFS. This includes containers that exist at the time of the
+        migration.
+
+
+        The major difference between the two implementations of stacking FS is
+
+        that AUFS makes use of "marker files" to track deleted files in the
+
+        upper layer, while overlay employs file attributes and character files.
+
+        The other part of the work is reorganizing the data on disk to adhere to
+
+        the structure the overlay2 driver expects.
+
+
+        To make these changes effective after running a migration the engine has
+        to
+
+        be reconfigured to use the overlay2 storage-driver and containers have
+        to be
+
+        restarted.
+
+
+        The code in cmd/a2o-migrate can be used stand-alone. For that see the
+
+        makefile "a2o-migrate" target.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Robert Günzler <robertg@balena.io>
+        signed-off-by: Robert Günzler <robertg@balena.io>
+      author: Robert Günzler
+  version: 19.03.14
+  date: 2020-06-11T16:02:55.287Z
+- commits:
     - subject: Add changelog template to allow generating nested changelogs
       hash: f272b547ee6c27c41be70da6b913699a2c5ef928
       body: ''
