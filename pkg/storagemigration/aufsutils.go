@@ -11,7 +11,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/docker/docker/cmd/a2o-migrate/osutil"
 	"github.com/docker/docker/pkg/archive"
 )
 
@@ -24,7 +23,7 @@ var (
 func CheckRootExists(engineDir string) error {
 	root := filepath.Join(engineDir, "aufs")
 	logrus.WithField("aufs_root", root).Debug("checking if aufs root exists")
-	ok, err := osutil.Exists(root, true)
+	ok, err := exists(root, true)
 	if err != nil {
 		return err
 	}

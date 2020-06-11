@@ -10,7 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 
-	"github.com/docker/docker/cmd/a2o-migrate/osutil"
 	"github.com/docker/docker/daemon/graphdriver/overlay2"
 )
 
@@ -23,7 +22,7 @@ var (
 func CheckRootExists(engineDir string) error {
 	root := filepath.Join(engineDir, "overlay2")
 	logrus.WithField("overlay_root", root).Debug("checking if overlay2 root exists")
-	ok, err := osutil.Exists(root, true)
+	ok, err := exists(root, true)
 	if err != nil {
 		return err
 	}
@@ -37,7 +36,7 @@ func CheckRootExists(engineDir string) error {
 // The returned layerRef is the content of the created link file
 func CreateLayerLink(root, layerID string) (layerRef string, err error) {
 	layerLinkFile := filepath.Join(root, layerID, "link")
-	ok, err := osutil.Exists(layerLinkFile, false)
+	ok, err := exists(layerLinkFile, false)
 	if err != nil {
 		return "", fmt.Errorf("Error checking for %s: %v", layerLinkFile, err)
 	}
@@ -52,7 +51,7 @@ func CreateLayerLink(root, layerID string) (layerRef string, err error) {
 		return string(ref), nil
 	}
 	layerRefDir := filepath.Join(root, "l")
-	ok, err = osutil.Exists(layerRefDir, true)
+	ok, err = exists(layerRefDir, true)
 	if err != nil {
 		return "", fmt.Errorf("Error checking for %s: %v", layerRefDir, err)
 	}
