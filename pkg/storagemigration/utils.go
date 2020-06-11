@@ -10,15 +10,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func SwitchAllContainersStorageDriver(newStorageDriver string) error {
-	containerDir := filepath.Join(StorageRoot, "containers")
+func SwitchAllContainersStorageDriver(root, newStorageDriver string) error {
+	containerDir := filepath.Join(root, "containers")
 	containerIDs, err := loadIDs(containerDir)
 	if err != nil {
 		return fmt.Errorf("Error listing containers: %v", err)
 	}
 	logrus.Infof("migrating %v container(s) to %s", len(containerIDs), newStorageDriver)
 	for _, containerID := range containerIDs {
-		err := switchContainerStorageDriver(containerID, newStorageDriver)
+		err := switchContainerStorageDriver(root, containerID, newStorageDriver)
 		if err != nil {
 			return fmt.Errorf("Error rewriting container config for %s: %v", containerID, err)
 		}
@@ -29,8 +29,8 @@ func SwitchAllContainersStorageDriver(newStorageDriver string) error {
 
 // switchContainerStorageDriver rewrites the container config to use a new storage driver,
 // this is the only change needed to make it work after the migration
-func switchContainerStorageDriver(containerID, newStorageDriver string) error {
-	containerConfigPath := filepath.Join(StorageRoot, "containers", containerID, "config.v2.json")
+func switchContainerStorageDriver(root, containerID, newStorageDriver string) error {
+	containerConfigPath := filepath.Join(root, "containers", containerID, "config.v2.json")
 	f, err := os.OpenFile(containerConfigPath, os.O_RDWR, os.ModePerm)
 	if err != nil {
 		return err

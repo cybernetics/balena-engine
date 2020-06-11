@@ -13,17 +13,17 @@ import (
 )
 
 // Migrate migrates the state of the storage from aufs -> overlay2
-func Migrate() error {
-	logrus.Info("starting aufs -> overlay2 migration")
+func Migrate(root string) error {
+	logrus.WithField("storage_root", root).Info("starting aufs -> overlay2 migration")
 
 	// make sure we actually have an aufs tree to migrate from
-	err := CheckRootExists(StorageRoot)
+	err := CheckRootExists(root)
 	if err != nil {
 		return err
 	}
 
 	// make sure there isn't an overlay2 tree already
-	err = CheckRootExists(StorageRoot)
+	err = CheckRootExists(root)
 	if err == nil {
 		logrus.Warn("overlay root found, cleaning up...")
 		err := os.Remove(overlayRoot())
@@ -261,8 +261,8 @@ func Migrate() error {
 
 	logrus.Info("moving aufs images to overlay")
 	var (
-		aufsImageDir    = filepath.Join(StorageRoot, "image", "aufs")
-		overlayImageDir = filepath.Join(StorageRoot, "image", "overlay2")
+		aufsImageDir    = filepath.Join(root, "image", "aufs")
+		overlayImageDir = filepath.Join(root, "image", "overlay2")
 	)
 	err = replicate(aufsImageDir, overlayImageDir)
 	if err != nil {

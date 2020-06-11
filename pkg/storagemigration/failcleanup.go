@@ -11,20 +11,20 @@ import (
 // It will remove any files left over from the migration process
 // and migrate containers back to aufs.
 //
-func FailCleanup() error {
-	logrus.Info("recovering from failed migration")
+func FailCleanup(root string) error {
+	logrus.WithField("storage_root", root).Info("recovering from failed migration")
 
-	err := removeDirIfExists(tempTargetRoot())
+	err := removeDirIfExists(tempTargetRoot(root))
 	if err != nil {
 		return err
 	}
 
-	err = removeDirIfExists(overlayRoot())
+	err = removeDirIfExists(overlayRoot(root))
 	if err != nil {
 		return err
 	}
 
-	overlayImageDir := filepath.Join(StorageRoot, "image", "overlay2")
+	overlayImageDir := filepath.Join(root, "image", "overlay2")
 	err = removeDirIfExists(overlayImageDir)
 	if err != nil {
 		return err
