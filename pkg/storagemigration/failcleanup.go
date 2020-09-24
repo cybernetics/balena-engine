@@ -12,7 +12,7 @@ import (
 // and migrate containers back to aufs.
 //
 func FailCleanup(root string) error {
-	logrus.WithField("storage_root", root).Info("recovering from failed migration")
+	logrus.WithField("storage_root", root).Warning("recovering from failed aufs to overlay migration")
 
 	err := removeDirIfExists(tempTargetRoot(root))
 	if err != nil {

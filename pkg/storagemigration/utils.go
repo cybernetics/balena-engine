@@ -16,7 +16,7 @@ func SwitchAllContainersStorageDriver(root, newStorageDriver string) error {
 	if err != nil {
 		return fmt.Errorf("Error listing containers: %v", err)
 	}
-	logrus.Infof("migrating %v container(s) to %s", len(containerIDs), newStorageDriver)
+	logrus.Debugf("migrating %v container(s) to %s", len(containerIDs), newStorageDriver)
 	for _, containerID := range containerIDs {
 		err := switchContainerStorageDriver(root, containerID, newStorageDriver)
 		if err != nil {
