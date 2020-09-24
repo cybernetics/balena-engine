@@ -22,15 +22,10 @@ func Migrate(root string) error {
 		return err
 	}
 
-	// TODO this needs to go... we can't overwrite the previous migration
 	// make sure there isn't an overlay2 tree already
 	err = CheckOvlRootExists(root)
 	if err == nil {
-		logrus.Warn("overlay root found, cleaning up...")
-		err := os.RemoveAll(overlayRoot(root))
-		if err != nil {
-			return fmt.Errorf("Error cleaning up overlay2 root: %v", err)
-		}
+		return ErrOverlayRootExists
 	}
 
 	var state State

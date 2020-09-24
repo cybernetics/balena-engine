@@ -16,6 +16,8 @@ import (
 var (
 	// ErrOverlayRootNotExists indicates the overlay2 root directory wasn't found
 	ErrOverlayRootNotExists = errors.New("Overlay2 root doesn't exists")
+	// ErrOverlayRootExists indicates the migration was already run sucessfully
+	ErrOverlayRootExists = errors.New("Overlay2 root exists")
 )
 
 // CheckRootExists checks for the overlay storage root directory

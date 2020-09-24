@@ -942,21 +942,26 @@ func NewDaemon(ctx context.Context, config *config.Config, pluginStore *plugin.S
 		start := time.Now()
 		var err error
 		err = storagemigration.Migrate(config.Root)
-		// gracefully handle non-existing aufs root
-		// we have nothing to migrate from
-		if err != nil && err != storagemigration.ErrAuFSRootNotExists {
-			if err := storagemigration.FailCleanup(config.Root); err != nil {
-				return nil, errors.Wrap(err, "failed to cleanup after failed migration")
+		if err != nil {
+			if err == storagemigration.ErrAuFSRootNotExists ||
+				err == storagemigration.ErrOverlayRootExists {
+				// gracefully handle missing aufs root or existing
+				// overlay root - we have nothing to migrate from
+				logrus.Infof("Storage migartion skipped: %s", err)
+			} else {
+				// rollback on errors
+				if err := storagemigration.FailCleanup(config.Root); err != nil {
+					return nil, errors.Wrap(err, "failed to cleanup after failed storage migration")
+				}
+				return nil, errors.Wrap(err, "failed to migrate storage")
 			}
-			return nil, errors.Wrap(err, "failed to migrate storage")
-		}
-		// only commit if migration succeded
-		if err == nil {
+		} else {
+			// only commit if migration succeded
 			if err := storagemigration.Commit(config.Root); err != nil {
 				return nil, errors.Wrap(err, "failed to commit storage migration")
 			}
+			logrus.Infof("Storage migration from aufs to overlay2, took %s", time.Now().Sub(start))
 		}
-		logrus.Infof("Storage migration from aufs to overlay2, took %s", time.Now().Sub(start))
 	}
 
 	for operatingSystem, gd := range d.graphDrivers {

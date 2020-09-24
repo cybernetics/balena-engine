@@ -1,4 +1,3 @@
-// TODO we can probably re-use containerd libs?
 package storagemigration
 
 import "path/filepath"
@@ -29,9 +28,6 @@ const (
 	MetaWhiteout
 
 	// MetaOther is a catch-all for everything else
-	//
-	// TODO(robertgzr): replace this with more meta types
-	// for better mapping from a->o, o->a
 	MetaOther
 )
 
