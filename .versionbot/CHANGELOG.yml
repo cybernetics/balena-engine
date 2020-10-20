@@ -1,4 +1,43 @@
 - commits:
+    - subject: Add build script using buildx
+      hash: 6395a9a1eb9c077e0677c2ee90dc2866c7cf796d
+      body: |
+        Repo type remains unchanged even though CI will trigger the
+        build-in-container task for the engine now.
+        We need the balena-engine type here to ensure versioning works with the
+        engine specific quirks.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Robert Günzler <robertg@balena.io>
+        signed-off-by: Robert Günzler <robertg@balena.io>
+      author: Robert Günzler
+      nested: []
+    - subject: Enable buildkit syntax for the dockerfile
+      hash: 2ac8855faea2bd0b953fe46efea6accca2ebafe9
+      body: |
+        This allows building a binary like:
+        DOCKER_BUILDKIT=1 docker build --target=binary -o ./bundles/ .
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Robert Günzler <robertg@balena.io>
+        signed-off-by: Robert Günzler <robertg@balena.io>
+      author: Robert Günzler
+      nested: []
+    - subject: Fix the proxy installer to use balena-libnetwork
+      hash: cc9fe0caff38f41fc902b7ee35794f501ef3367f
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Robert Günzler <robertg@balena.io>
+        signed-off-by: Robert Günzler <robertg@balena.io>
+      author: Robert Günzler
+      nested: []
+  version: 19.03.15
+  date: 2020-10-20T10:32:08.440Z
+- commits:
     - subject: Bump balena-os/balena-containerd to 1da48a8
       hash: ab1a49816fd8ae2ec73dc83152ad06a05a6b9799
       body: |
