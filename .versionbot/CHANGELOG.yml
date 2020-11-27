@@ -1,4 +1,23 @@
 - commits:
+    - subject: Lock destination layers while delta is being processed
+      hash: 5aaa0eef937d38ade78524d7b54ada2248090a44
+      body: |
+        During fingerpinting of the source image the destination layers are not
+        exepmt from being released (e.g. when `balena image rm <iid>`) is run
+        simultaneously.
+        Similarly when processing the destination layers to generate deltas we
+        only hold one reference at a time, leaving the subsequent layers
+        vulnerable to the same issues.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Robert Günzler <robertg@balena.io>
+        signed-off-by: Robert Günzler <robertg@balena.io>
+      author: Robert Günzler
+      nested: []
+  version: 19.03.15
+  date: 2020-11-27T15:34:34.974Z
+- commits:
     - subject: Bump balena-os/balena-containerd to 1da48a8
       hash: ab1a49816fd8ae2ec73dc83152ad06a05a6b9799
       body: |
