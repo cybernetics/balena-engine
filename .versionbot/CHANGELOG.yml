@@ -1,4 +1,28 @@
 - commits:
+    - subject: Update the README
+      hash: 46b269e68712757c60a63a6d31772a4730de4a21
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Robert Günzler <robertg@balena.io>
+        signed-off-by: Robert Günzler <robertg@balena.io>
+      author: Robert Günzler
+      nested: []
+    - subject: Cleanup repo
+      hash: 8130bae680454318f5f64a85408be988726b36da
+      body: |
+        remove some obsolete files/directories
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Robert Günzler <robertg@balena.io>
+        signed-off-by: Robert Günzler <robertg@balena.io>
+      author: Robert Günzler
+      nested: []
+  version: 19.03.15
+  date: 2020-12-04T16:05:26.763Z
+- commits:
     - subject: Bump balena-os/balena-containerd to 1da48a8
       hash: ab1a49816fd8ae2ec73dc83152ad06a05a6b9799
       body: |
