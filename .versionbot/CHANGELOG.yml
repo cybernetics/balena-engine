@@ -1,4 +1,17 @@
 - commits:
+    - subject: Add a SECURITY.md
+      hash: b548c74ad67eae6107fc593a3a37eaeb25349feb
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Robert Günzler <robertg@balena.io>
+        signed-off-by: Robert Günzler <robertg@balena.io>
+      author: Robert Günzler
+      nested: []
+  version: 19.03.15
+  date: 2020-12-08T12:54:33.807Z
+- commits:
     - subject: Bump balena-os/balena-containerd to 1da48a8
       hash: ab1a49816fd8ae2ec73dc83152ad06a05a6b9799
       body: |
